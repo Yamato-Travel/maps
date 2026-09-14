@@ -2249,17 +2249,26 @@ function geoHelp(timeout){
         + '<li>בתוך בניין או תחנת רכבת תת קרקעית האיתור לעיתים נכשל. נסו שוב בחוץ</li>'
         + '<li>רענון הדף בדרך כלל פותר</li>';
   } else if(iOS && chrome){
-    steps='<li>הגדרות בטלפון, גוללים עד Chrome</li>'
-        + '<li>לוחצים על מיקום, ובוחרים בזמן השימוש באפליקציה</li>'
+    steps='<li>הגדרות בטלפון, גוללים עד Chrome, ולוחצים על מיקום</li>'
+        + '<li>בוחרים בזמן השימוש באפליקציה</li>'
         + '<li>חוזרים לכאן ומרעננים את הדף</li>';
   } else if(iOS){
-    steps='<li>הגדרות בטלפון, גוללים עד Safari</li>'
-        + '<li>לוחצים על מיקום, ובוחרים Ask או Allow</li>'
+    steps='<li>הגדרות בטלפון, פרטיות ואבטחה, שירותי מיקום</li>'
+        + '<li>גוללים עד אתרי ספארי, ובוחרים בזמן השימוש באפליקציה</li>'
         + '<li>סוגרים את הלשונית הזו לגמרי ופותחים את המפה מחדש</li>';
+  } else if(/Android/i.test(ua)){
+    steps='<li>לוחצים על הסמל שמשמאל לכתובת האתר למעלה, ואז על הרשאות</li>'
+        + '<li>מפעילים מיקום, ומרעננים את הדף</li>'
+        + '<li>אם זה לא עוזר, הגדרות הטלפון, אפליקציות, הדפדפן, הרשאות, מיקום, ומאפשרים</li>';
   } else {
     steps='<li>לוחצים על סמל המנעול שליד כתובת האתר למעלה</li>'
         + '<li>בוחרים הרשאות, ומאפשרים מיקום</li>'
         + '<li>מרעננים את הדף</li>';
+  }
+  /* בתוך מסגרת באתר הדפדפן חוסם מיקום לעיתים קרובות. פתיחה במסך מלא פותרת מיד */
+  const framed = (function(){ try{ return window.self!==window.top; }catch(e){ return true; } })();
+  if(framed && !timeout){
+    steps='<li>הדרך המהירה, לפתוח את המפה במסך מלא בכפתור שלמטה</li>' + steps;
   }
   const d=document.createElement('div');
   d.id='geoHelp';
@@ -2274,11 +2283,14 @@ function geoHelp(timeout){
      + '</div>'
      + '<ol style="margin:0 0 12px;padding-inline-start:18px;color:#4a433c">'+steps+'</ol>'
      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+     + (framed?'<button id="geoFull" style="flex:1 1 100%;background:#C8A24A;color:#1d1a17;border:0;border-radius:10px;padding:12px 14px;font:700 14.5px Heebo,sans-serif;cursor:pointer;margin-bottom:2px">פתיחת המפה במסך מלא</button>':'')
      + '<button id="geoZone" style="flex:1 1 auto;min-width:150px;background:#4A1F3D;color:#fff;border:0;border-radius:10px;padding:11px 14px;font:700 14px Heebo,sans-serif;cursor:pointer">בחירת שכונה במקום</button>'
      + '<button id="geoClose" style="flex:0 0 auto;background:#F2EFEA;color:#4a433c;border:0;border-radius:10px;padding:11px 16px;font:600 14px Heebo,sans-serif;cursor:pointer">סגירה</button>'
      + '</div>';
   document.body.appendChild(d);
   document.getElementById('geoClose').onclick=()=>d.remove();
+  const gf=document.getElementById('geoFull');
+  if(gf) gf.onclick=()=>{ window.open(location.href,'_blank','noopener'); };
   document.getElementById('geoZone').onclick=()=>{
     d.remove();
     if(typeof exitZone==='function') exitZone();
